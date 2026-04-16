@@ -62,7 +62,6 @@ Example `.env` file:
 
 ```env
 PORT=3000
-GENDERIZE_API_KEY=
 ```
 
 ## API Reference
@@ -139,25 +138,7 @@ or
 ```json
 {
 	"status": "error",
-	"message": "External API error (502)"
-}
-```
-
-`503 Service Unavailable`:
-
-```json
-{
-	"status": "error",
-	"message": "Genderize rate limit reached. Try again later or add GENDERIZE_API_KEY."
-}
-```
-
-`504 Gateway Timeout`:
-
-```json
-{
-	"status": "error",
-	"message": "External API timeout"
+	"message": "External API error"
 }
 ```
 
@@ -179,7 +160,6 @@ curl "http://localhost:3000/api/classify?name=alex"
 
 - This service depends on `https://api.genderize.io` availability.
 - Current CORS configuration allows all origins (`*`).
-- If you hit rate limits in production, set `GENDERIZE_API_KEY`.
 
 ## Deployment
 
@@ -240,13 +220,3 @@ curl "https://<your-vercel-url>/api/classify?name=alex"
 - Keep `src/server.js` for local/dev runtime (`npm run dev`).
 - Vercel uses the serverless function (`api/index.js`) and does not need `app.listen(...)`.
 - If your frontend is hosted on a different domain, replace open CORS (`*`) with an allowlist.
-
-### Troubleshooting `External API error`
-
-If production returns `{"status":"error","message":"External API error"}`:
-
-1. Check your Render/Vercel logs to see upstream status and error details.
-2. Retry the direct upstream call:
-	- `https://api.genderize.io/?name=alex`
-3. If upstream returns `429`, configure `GENDERIZE_API_KEY` in your deployment environment.
-4. Redeploy after updating environment variables.
