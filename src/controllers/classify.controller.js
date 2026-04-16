@@ -43,9 +43,35 @@ exports.classifyName = async (req, res) => {
     });
 
   } catch (error) {
+    const upstreamStatus = error.response?.status;
+    const upstreamMessage =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message;
+
+    console.error('Genderize API error:', {
+      status: upstreamStatus,
+      message: upstreamMessage,
+      code: error.code
+    });
+
+    if (upstreamStatus === 429) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Genderize rate limit reached. Try again later or add GENDERIZE_API_KEY.'
+      });
+    }
+
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({
+        status: 'error',
+        message: 'External API timeout'
+      });
+    }
+
     return res.status(502).json({
       status: 'error',
-      message: 'External API error'
+      message: `External API error${upstreamStatus ? ` (${upstreamStatus})` : ''}`
     });
   }
 };
